@@ -293,6 +293,33 @@ namespace System.Collections.Immutable
         /// See the <see cref="IImmutableList&lt;T&gt;"/> interface.
         /// </summary>
         [Pure]
+        public ImmutableList<T> AddRangeOriginal(IEnumerable<T> items)
+        {
+            Requires.NotNull(items, "items");
+            Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
+            Contract.Ensures(Contract.Result<ImmutableList<T>>().Count >= this.Count);
+
+            // Some optimizations may apply if we're an empty list.
+            if (this.IsEmpty)
+            {
+                return this.FillFromEmpty(items);
+            }
+
+            // Let's not implement in terms of ImmutableList.Add so that we're
+            // not unnecessarily generating a new list object for each item.
+            var result = this.root;
+            foreach (T item in items)
+            {
+                result = result.Add(item);
+            }
+
+            return this.Wrap(result);
+        }
+
+        /// <summary>
+        /// See the <see cref="IImmutableList&lt;T&gt;"/> interface.
+        /// </summary>
+        [Pure]
         public ImmutableList<T> Insert(int index, T item)
         {
             Requires.Range(index >= 0 && index <= this.Count, "index");
