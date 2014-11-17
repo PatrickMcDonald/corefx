@@ -1,0 +1,2 @@
+@echo off
+src\ImmutableCollectionsPerformanceTests\bin\Release\ImmutableCollectionsPerformanceTests.exe

@@ -719,6 +719,12 @@ namespace System.Collections.Immutable
             return ImmutableList<TOutput>.WrapNode(this.root.ConvertAll(converter));
         }
 
+        public ImmutableList<TOutput> ConvertAllOriginal<TOutput>(Func<T, TOutput> converter)
+        {
+            Requires.NotNull(converter, "converter");
+            return ImmutableList<TOutput>.WrapNode(this.root.ConvertAllOriginal(converter));
+        }
+
         /// <summary>
         /// Determines whether the ImmutableList&lt;T&gt; contains elements
         /// that match the conditions defined by the specified predicate.
@@ -773,6 +779,12 @@ namespace System.Collections.Immutable
         {
             Requires.NotNull(match, "match");
             return this.root.FindAll(match);
+        }
+
+        public ImmutableList<T> FindAllOriginal(Predicate<T> match)
+        {
+            Requires.NotNull(match, "match");
+            return this.root.FindAllOriginal(match);
         }
 
         /// <summary>
@@ -2692,6 +2704,17 @@ namespace System.Collections.Immutable
                 return root.AddRange(this.Select(converter));
             }
 
+            internal ImmutableList<TOutput>.Node ConvertAllOriginal<TOutput>(Func<T, TOutput> converter)
+            {
+                var root = ImmutableList<TOutput>.Node.EmptyNode;
+                foreach (var item in this)
+                {
+                    root = root.Add(converter(item));
+                }
+
+                return root;
+            }
+
             /// <summary>
             /// Determines whether every element in the ImmutableList&lt;T&gt;
             /// matches the conditions defined by the specified predicate.
@@ -2793,6 +2816,23 @@ namespace System.Collections.Immutable
 
                 var builder = ImmutableList<T>.Empty.ToBuilder();
                 builder.AddRange(this.Where(x => match.Invoke(x)));
+
+                return builder.ToImmutable();
+            }
+
+            internal ImmutableList<T> FindAllOriginal(Predicate<T> match)
+            {
+                Requires.NotNull(match, "match");
+                Contract.Ensures(Contract.Result<ImmutableList<T>>() != null);
+
+                var builder = ImmutableList<T>.Empty.ToBuilder();
+                foreach (var item in this)
+                {
+                    if (match(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
 
                 return builder.ToImmutable();
             }
